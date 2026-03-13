@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Visit Report Dashboard</title>
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+    <!-- Scripts -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-page: #f8fafc;
+            --accent: #0f172a;
+            --accent-hover: #334155;
+            --header-yellow: #fff9db;
+            --header-green: #92d050;
+            --header-blue: #ddebf7;
+            --border-excel: #000000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            padding: 2rem;
+            color: #1a1a1a;
+        }
+
+        /* Control Panel */
+        .controls-container {
+            max-width: 1400px;
+            margin: 0 auto 2rem;
+            background: #fff;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: flex-end;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .filter-label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #64748b;
+            letter-spacing: 0.05em;
+        }
+
+        select,
+        .date-input {
+            padding: 0.6rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-weight: 500;
+            background: #fff;
+            min-width: 200px;
+        }
+
+        .date-input {
+            min-width: 140px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.8rem;
+            margin-left: auto;
+        }
+
+        .btn-main {
+            padding: 0.8rem 1.2rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+
+        .btn-main:hover:not(:disabled) {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-main:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-staff {
+            background: #64748b;
+        }
+
+        .btn-staff:hover {
+            background: #475569;
+        }
+
+        #reportCanvas {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            background: white;
+            box-shadow: none;
+            padding: 0;
+            display: none;
+            overflow: visible;
+        }
+
+        .report-header-zone {
+            text-align: center;
+            border: 2px solid var(--border-excel);
+        }
+
+        .main-header {
+            background: var(--header-yellow);
+            padding: 15px;
+            font-size: 1.4rem;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            border-bottom: 2px solid var(--border-excel);
+            text-transform: uppercase;
+        }
+
+        .sub-header {
+            background: var(--header-green);
+            padding: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            /* Remove scrollbars by sticking to container width */
+        }
+
+        .data-table th,
+        .data-table td {
+            border: 1px solid var(--border-excel);
+            padding: 5px 3px;
+            word-wrap: break-word;
+            font-size: 8.5pt;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 1.2;
+        }
+
+        .data-table th {
+            background: var(--header-blue);
+            font-weight: 700;
+            height: 100px;
+            /* Taller headers for multiple lines */
+            text-transform: uppercase;
+            font-size: 8pt;
+        }
+
+        .hide-col {
+            display: none;
+        }
+
+        .text-left {
+            text-align: left !important;
+        }
+
+        /* Group Header Row */
+        .group-header-row td {
+            background: #e2efda !important;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11pt;
+            letter-spacing: 0.1em;
+            color: #000;
+            height: 40px !important;
+            border-top: 2px solid #000 !important;
+            border-bottom: 2px solid #000 !important;
+            text-align: center !important;
+        }
+
+        /* Upload Placeholder */
+        #uploadSection {
+            text-align: center;
+            padding: 6rem 2rem;
+            background: white;
+            border-radius: 24px;
+            border: 3px dashed #cbd5e1;
+            margin: 4rem auto;
+            max-width: 600px;
+            transition: border-color 0.3s;
+        }
+
+        #uploadSection:hover {
+            border-color: #64748b;
+        }
+
+        /* Loading Overlay */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e2e8f0;
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media print {
+            body {
+                padding: 0;
+                background: white;
+                margin: 0;
+                width: 100%;
+            }
+
+            .no-print-zone {
+                display: none !important;
+            }
+
+            #reportCanvas {
+                box-shadow: none;
+                margin: 0;
+                width: 100% !important;
+                display: block !important;
+                transform: scale(1);
+                transform-origin: top left;
+            }
+
+            @page {
+                size: landscape;
+                margin: 0.2cm;
+            }
+
+            .master-header-row {
+                page-break-before: always !important;
+                break-before: page;
+            }
+
+            #tableBody .master-header-row:first-child {
+                break-before: auto;
+                page-break-before: avoid !important;
+            }
+
+            header {
+                display: none !important;
+            }
+
+            .data-table {
+                width: 100% !important;
+                page-break-after: auto;
+            }
+
+            .data-table td {
+                height: 60px;
+                /* Restore comfortable height for writing */
+                font-size: 8pt;
+            }
+
+            tr {
+                page-break-inside: avoid;
+            }
+
+            .hide-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <p style="font-weight: 600; color: var(--accent);">Processing Excel Data...</p>
+        <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.5rem;">This may take a moment for large files</p>
+    </div>
+
+    <div class="no-print-zone">
+        <div id="uploadSection">
+            <i data-lucide="file-spreadsheet" size="64" style="color: #64748b; margin-bottom: 1.5rem;"></i>
+            <h2 style="margin-bottom: 1rem;">Site Visit Report Pro</h2>
+            <p style="color: #64748b; margin-bottom: 2rem;">Upload your XLSX file to generate team or staff reports.</p>
+            <button class="btn-main" onclick="document.getElementById('excelInput').click()"
+                style="margin: 0 auto; padding: 1rem 2rem;">
+                <i data-lucide="upload-cloud"></i> Load Excel File
+            </button>
+            <input type="file" id="excelInput" hidden accept=".xlsx, .xls">
+        </div>
+
+        <div id="controlPanel" class="controls-container" style="display: none;">
+            <div class="filter-group">
+                <span class="filter-label">1. Select Name</span>
+                <select id="masterPicker" onchange="updateView()">
+                    <option value="">-- Loading --</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <span class="filter-label">2. From Date</span>
+                <input type="date" id="startDate" class="date-input" onchange="updateView()">
+            </div>
+
+            <div class="filter-group">
+                <span class="filter-label">3. To Date</span>
+                <input type="date" id="endDate" class="date-input" onchange="updateView()">
+            </div>
+
+            <div class="btn-group">
+                <button id="downloadBtn" class="btn-main" onclick="window.print()" disabled>
+                    <i data-lucide="printer"></i> Cummulative Download PDF
+                </button>
+            </div>
+
+            <button class="btn-main" onclick="location.reload()"
+                style="background: transparent; color: #64748b; border: 1px solid #e2e8f0; margin-left:1rem;">
+                <i data-lucide="refresh-cw"></i> New File
+            </button>
+        </div>
+    </div>
+
+    <div id="reportCanvas">
+        <div class="report-header-zone">
+            <div class="main-header" id="masterTitle">SITE VISIT REPORT</div>
+            <div class="sub-header" id="teamLeaderName">ALL TEAMS</div>
+        </div>
+
+        <table class="data-table">
+            <thead id="mainHeader"></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        /*******************************************************************************
+         * DEVELOPER GUIDE - STEP BY STEP EXPLANATION
+         *******************************************************************************
+         * 1. DATA LOADING: The 'excelInput' listener reads the .xlsx file using SheetJS.
+         *    Data is stored in the 'rawData' array as JSON objects.
+         * 
+         * 2. FILTERING (performFilter): 
+         *    - Filters data based on the selected Team Leader and Date Range.
+         *    - Cleans strings (toLowerCase, trim) to ensure matches even with extra spaces.
+         * 
+         * 3. UI UPDATES (updateView):
+         *    - Triggered whenever a filter changes.
+         *    - Calls updateTitle() to refresh the header dates & PDF filename.
+         *    - Calls renderTable() to redraw the report.
+         * 
+         * 4. RENDERING (renderTable):
+         *    - Centralized 'hidden' array: Change numbers here to show/hide columns.
+         *    - Centralized 'widths' array: Adjust these to change column sizes (%).
+         *    - Logic handles repeating 'Master Headers' and 'Staff Labels' for the PDF.
+         * 
+         * 5. PRINTING: Uses CSS (@media print) to force page breaks and hide UI buttons.
+         ******************************************************************************/
+
+        lucide.createIcons();
+
+        let rawData = [];
+        let config = {
+            masterTitle: "SITE VISIT REPORT",
+            staffCol: "SITE VISIT GIVEN STAFFNAME",
+            teleCol: "TELE MARKETING STAFF NAME",
+            teamCol: "TEAM NAME",
+            commentCol: "COMMENTS"
+        };
+
+        const PREDEFINED_TEAMS = [
+            "All Teams", "Mr.Ashok sir", "Mr.Ayyappan Sir& Mrs.Latha Mam", "Mr.Prabhakaran Sir",
+            "Mr.Suriya Sir & Mr.Selvakumar sir", "Mr.Gopi sir", "Mr.Sankar Sir", "Mr.Thangadurai Sir",
+            "Mr.Ranjith Sir", "Mr.Rajiv Sir", "Mr.AK.Kumaresan sir", "Mr.Senthil Sir",
+            "Mr.Suriya sir", "Mr.SelvaKumar Sir", "Management"
+        ];
+
+        document.getElementById('excelInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            document.getElementById('loadingOverlay').style.display = 'flex';
+
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                setTimeout(() => {
+                    try {
+                        const data = new Uint8Array(ev.target.result);
+                        const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                        let foundData = false;
+
+                        for (let sn of workbook.SheetNames) {
+                            const ws = workbook.Sheets[sn];
+                            const peek = XLSX.utils.sheet_to_json(ws, { header: 1, range: 0, defval: "" }).slice(0, 50);
+                            if (peek.length < 5) continue;
+
+                            const keywords = ['DATE', 'CLIENT', 'STAFF', 'PHONE', 'BUDGET', 'SNO', 'LAYOUT', 'FEEDBACK'];
+                            let maxM = -1;
+                            let bestI = 0;
+
+                            peek.forEach((row, idx) => {
+                                if (!row || !Array.isArray(row)) return;
+                                const matches = row.filter(cell => {
+                                    const v = String(cell || "").toUpperCase().replace(/[^A-Z]/g, '');
+                                    return keywords.some(k => v.includes(k));
+                                }).length;
+                                if (matches > maxM && matches >= 4) {
+                                    maxM = matches;
+                                    bestI = idx;
+                                }
+                            });
+
+                            if (maxM >= 4) {
+                                const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+                                const hIdx = bestI;
+                                const headers = json[hIdx].map(h => String(h || "").trim());
+                                const normH = headers.map(h => h.toUpperCase().replace(/[^A-Z]/g, ''));
+
+                                const getH = (kw) => {
+                                    const idx = normH.findIndex(nh => nh.includes(kw));
+                                    return idx !== -1 ? headers[idx] : null;
+                                };
+
+                                config.teleCol = getH("TELEMARKETING") || "TELE MARKETING STAFF NAME";
+                                config.staffCol = getH("GIVENSTAFF") || getH("SITEVISITGIVEN") || "SITE VISIT GIVEN STAFFNAME";
+                                config.teamCol = getH("TEAMNAME") || getH("TEAM");
+                                config.commentCol = getH("COMMENT") || getH("REMARK") || getH("NOTES") || "COMMENTS";
+
+                                rawData = json.slice(hIdx + 1).map(row => {
+                                    let obj = {};
+                                    headers.forEach((h, i) => {
+                                        if (h) {
+                                            const key = h.toUpperCase().trim();
+                                            obj[key] = row[i];
+                                            obj[h] = row[i];
+                                        }
+                                    });
+                                    return obj;
+                                }).filter(r => {
+                                    const vals = Object.values(r).filter(v => v !== "" && v !== null && v !== undefined);
+                                    return vals.length >= 2;
+                                });
+
+                                if (rawData.length > 0) {
+                                    foundData = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        document.getElementById('loadingOverlay').style.display = 'none';
+
+                        if (!foundData) {
+                            alert("Found no matching columns. Please ensure your Excel file contains headers like DATE, CLIENT NAME, and STAFF NAME.");
+                            return;
+                        }
+
+                        populateMasterPicker();
+                        document.getElementById('uploadSection').style.display = 'none';
+                        document.getElementById('controlPanel').style.display = 'flex';
+                        document.getElementById('reportCanvas').style.display = 'block';
+                        document.getElementById('masterPicker').value = "All Teams";
+                        updateView();
+                    } catch (err) {
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                        alert("Processing failed: " + err.message);
+                    }
+                }, 50);
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function populateMasterPicker() {
+            const picker = document.getElementById('masterPicker');
+            picker.innerHTML = '<option value="">-- Select --</option>';
+            PREDEFINED_TEAMS.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name; opt.innerText = name;
+                picker.appendChild(opt);
+            });
+        }
+
+        function updateView() {
+            const sel = document.getElementById('masterPicker').value;
+            const start = document.getElementById('startDate').value;
+            const end = document.getElementById('endDate').value;
+            if (!sel) return;
+
+            // Update title first so renderTable uses the new value for repeating rows
+            updateTitle(start, end);
+
+            let filtered = performFilter(sel, start, end);
+            renderTable(filtered);
+
+            document.getElementById('teamLeaderName').innerText = sel.toUpperCase();
+            document.getElementById('teamLeaderName').style.background = sel.includes("All") ? "var(--header-blue)" : "var(--header-green)";
+            document.getElementById('downloadBtn').disabled = false;
+        }
+
+        function performFilter(selectedName, startDate, endDate) {
+            let res = rawData;
+            if (selectedName && selectedName !== "All Teams") {
+                const search = selectedName.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+                res = res.filter(r => {
+                    return Object.values(r).some(val => {
+                        const cellVal = String(val || "").toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+                        return cellVal.includes(search) || search.includes(cellVal) && cellVal.length > 3;
+                    });
+                });
+            }
+
+            if (startDate || endDate) {
+                const s = startDate ? new Date(startDate) : null;
+                const e = endDate ? new Date(endDate) : null;
+                res = res.filter(r => {
+                    const dateVal = r['DATE'] || r['Date'] || r['date'];
+                    if (!dateVal) return false;
+                    const rd = new Date(dateVal);
+                    if (isNaN(rd)) return false;
+                    if (s) { s.setHours(0, 0, 0, 0); if (rd < s) return false; }
+                    if (e) { e.setHours(23, 59, 59, 999); if (rd > e) return false; }
+                    return true;
+                });
+            }
+
+            res.sort((a, b) => {
+                const sel = document.getElementById('masterPicker').value;
+                if (sel !== "All Teams") {
+                    const sA = String(a[config.teleCol] || "").toLowerCase().trim();
+                    const sB = String(b[config.teleCol] || "").toLowerCase().trim();
+                    if (sA !== sB) return sA < sB ? -1 : 1;
+                }
+                const teamA = String(a[config.teamCol] || "").toLowerCase().trim();
+                const teamB = String(b[config.teamCol] || "").toLowerCase().trim();
+                if (teamA !== teamB) return teamA < teamB ? -1 : 1;
+                const staffA = String(a[config.teleCol] || "").toLowerCase().trim();
+                const staffB = String(b[config.teleCol] || "").toLowerCase().trim();
+                return staffA < staffB ? -1 : 1;
+            });
+            return res;
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            const thead = document.getElementById('mainHeader');
+            tbody.innerHTML = ''; thead.innerHTML = '';
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="15" style="padding: 3rem; color: #94a3b8;">No records found for this selection</td></tr>';
+                return;
+            }
+
+            // NEAT FITTING: Define fixed widths for columns
+            const table = document.querySelector('.data-table');
+            const existingColgroup = table.querySelector('colgroup');
+            if (existingColgroup) existingColgroup.remove();
+
+            const colgroup = document.createElement('colgroup');
+            // Easy control: add or remove column numbers from this list to show/hide them
+            const hidden = [2, 3, 11, 12];
+
+            // Base widths: we give 0% to hidden ones and extra space to COMMENTS (last column)
+            const widths = [3, 6, 0, 0, 11, 10, 5, 8, 8, 11, 9, 0, 0, 8.5, 20.5];
+
+            widths.forEach((w, i) => {
+                const col = document.createElement('col');
+                if (hidden.includes(i)) col.style.display = 'none';
+                else col.style.width = w + '%';
+                colgroup.appendChild(col);
+            });
+            table.insertBefore(colgroup, thead);
+
+            let currentGroup = "";
+            let sNo = 1;
+            const sel = document.getElementById('masterPicker').value;
+            data.forEach((r) => {
+                const teamName = (r[config.teamCol] || "OTHERS").toUpperCase().trim();
+                const teleName = (r[config.teleCol] || "-").toUpperCase().trim();
+                const givenName = (r[config.staffCol] || "-").toUpperCase().trim();
+                const groupValue = (sel === "All Teams") ? teamName : teleName;
+                if (groupValue !== currentGroup) {
+                    // MASTER HEADER ROW (Repeating for each person except the first one)
+                    if (currentGroup !== "") {
+                        const masterTr = document.createElement('tr');
+                        masterTr.classList.add('master-header-row'); // Style in CSS
+                        const masterTd = document.createElement('td');
+                        masterTd.colSpan = 15;
+                        masterTd.style.background = "#fff9e6"; // Cream background
+                        masterTd.style.fontFamily = "'Playfair Display', serif";
+                        masterTd.style.fontWeight = "700";
+                        masterTd.style.fontSize = "1.1rem";
+                        masterTd.style.padding = "12px";
+                        masterTd.style.border = "1px solid #1a1a1a";
+                        masterTd.innerText = document.getElementById('masterTitle').innerText;
+                        masterTr.appendChild(masterTd);
+                        tbody.appendChild(masterTr);
+                    }
+
+                    const headerTr = document.createElement('tr');
+                    headerTr.classList.add('group-header-row');
+                    const headerTd = document.createElement('td');
+                    headerTd.colSpan = 15;
+                    headerTd.innerText = groupValue;
+                    headerTr.appendChild(headerTd);
+                    tbody.appendChild(headerTr);
+
+                    const blueTr = document.createElement('tr');
+                    blueTr.style.background = "var(--header-blue)";
+                    const titles = ['S.NO', 'DATE', 'TEAM NAME', 'TELE MARKETING STAFF NAME', 'SITE VISIT GIVEN STAFFNAME', 'CLIENT NAME', 'BUDGET', 'PHONE', 'SOURCE OF LEADS', 'VISITED LAYOUTS', 'INTERSTED LAYOUT', 'CONVERT TO SITTING YES / NO', 'SITTING DATE', 'FEEDBACK', 'COMMENTS'];
+                    titles.forEach((t, idx) => {
+                        const th = document.createElement('th');
+                        th.innerText = t;
+                        if (hidden.includes(idx)) th.classList.add('hide-col');
+                        blueTr.appendChild(th);
+                    });
+                    tbody.appendChild(blueTr);
+                    currentGroup = groupValue; sNo = 1;
+                }
+                const getVal = (row, ...keys) => {
+                    for (let k of keys) {
+                        const uk = k.toUpperCase().trim();
+                        if (row[uk] !== undefined) return row[uk];
+                        if (row[k] !== undefined) return row[k];
+                    }
+                    return "-";
+                };
+                const tr = document.createElement('tr');
+                const rowCells = [
+                    sNo++, formatDate(getVal(r, 'DATE')), teamName, teleName, givenName,
+                    getVal(r, 'CLIENT NAME', 'CLIENT'), getVal(r, 'BUDGET'), getVal(r, 'PHONE', 'CONTACT', 'MOBILE'),
+                    getVal(r, 'SOURCE OF LEADS', 'SOURCE'), getVal(r, 'VISITED LAYOUTS', 'VISITED'),
+                    getVal(r, 'INTERSTED LAYOUT', 'INTERSTED'), getVal(r, 'CONVERT TO SITTING YES / NO', 'SITTING YES/NO'),
+                    formatDate(getVal(r, 'SITTING DATE', 'SITTING')), getVal(r, 'FEEDBACK'),
+                    getVal(r, config.commentCol, 'COMMENTS', 'REMARKS')
+                ];
+                rowCells.forEach((val, idx) => {
+                    const td = document.createElement('td');
+                    td.innerText = (val === "-" || val === null || val === undefined) ? "" : val;
+                    if (hidden.includes(idx)) td.classList.add('hide-col');
+                    if ([3, 4, 5, 8, 9, 10, 11, 13, 14].includes(idx)) td.classList.add('text-left');
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateTitle(start, end) {
+            let sDate = start;
+            let eDate = end;
+            const selName = document.getElementById('masterPicker').value || "ALL TEAMS";
+
+            // Auto-detect dates if not manually selected
+            if (!sDate && !eDate && rawData.length > 0) {
+                let dates = rawData.map(r => {
+                    let v = r['DATE'] || r['Date'] || r['date'];
+                    return v ? new Date(v) : null;
+                }).filter(d => d && !isNaN(d));
+                if (dates.length > 0) {
+                    sDate = new Date(Math.min(...dates));
+                    eDate = new Date(Math.max(...dates));
+                }
+            }
+
+            let sStr = sDate ? formatFullDate(new Date(sDate)) : "";
+            let eStr = eDate ? formatFullDate(new Date(eDate)) : "";
+
+            let fullTitle = "SITE VISIT REPORT";
+            if (sStr) fullTitle += " FROM " + sStr;
+            if (eStr) fullTitle += " TO " + eStr;
+
+            document.getElementById('masterTitle').innerText = fullTitle.toUpperCase();
+
+            // Set dynamic PDF filename via document title
+            const teamSuffix = selName.toUpperCase().includes("ALL") ? "ALL TEAMS" : `${selName.toUpperCase()} TEAM`;
+            document.title = `${teamSuffix} ${fullTitle}`;
+        }
+
+        function formatDate(v) {
+            if (!v || v === "-") return "-";
+            const d = new Date(v);
+            return isNaN(d) ? v : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
+        }
+
+        function formatFullDate(d) {
+            if (!d || isNaN(d)) return "";
+            return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+        }
+    </script>
+</body>
+
+</html>
