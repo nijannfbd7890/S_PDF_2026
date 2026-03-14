@@ -12,6 +12,11 @@
     <!-- Scripts -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- PDF & Zip Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
             --bg-page: #f8fafc;
@@ -200,20 +205,73 @@
             text-align: center !important;
         }
 
-        /* Upload Placeholder */
+        /* Updated Upload/Welcome Section */
         #uploadSection {
-            text-align: center;
-            padding: 6rem 2rem;
+            max-width: 1000px;
+            margin: 2rem auto;
             background: white;
-            border-radius: 24px;
-            border: 3px dashed #cbd5e1;
-            margin: 4rem auto;
-            max-width: 600px;
-            transition: border-color 0.3s;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            display: flex;
+            min-height: 600px;
+            border: 1px solid #e2e8f0;
         }
 
-        #uploadSection:hover {
-            border-color: #64748b;
+        .welcome-left {
+            flex: 1;
+            background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.7)), url('cs.jpg');
+            background-size: cover;
+            background-position: center;
+            padding: 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: white;
+        }
+
+        .welcome-right {
+            flex: 1;
+            padding: 4rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+        }
+
+        .welcome-logo {
+            width: 180px;
+            margin-bottom: 2rem;
+            object-fit: contain;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .drop-zone {
+            width: 100%;
+            border: 2px dashed #cbd5e1;
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .drop-zone:hover {
+            border-color: #92d050;
+            background: #f7fee7;
         }
 
         /* Loading Overlay */
@@ -245,6 +303,16 @@
             to {
                 transform: rotate(360deg);
             }
+        }
+
+        @keyframes spinner-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spinner-icon {
+            animation: spinner-spin 1s linear infinite;
         }
 
         @media print {
@@ -319,14 +387,29 @@
 
     <div class="no-print-zone">
         <div id="uploadSection">
-            <i data-lucide="file-spreadsheet" size="64" style="color: #64748b; margin-bottom: 1.5rem;"></i>
-            <h2 style="margin-bottom: 1rem;">Site Visit Report Pro</h2>
-            <p style="color: #64748b; margin-bottom: 2rem;">Upload your XLSX file to generate team or staff reports.</p>
-            <button class="btn-main" onclick="document.getElementById('excelInput').click()"
-                style="margin: 0 auto; padding: 1rem 2rem;">
-                <i data-lucide="upload-cloud"></i> Load Excel File
-            </button>
-            <input type="file" id="excelInput" hidden accept=".xlsx, .xls">
+            <div class="welcome-left">
+                <h1 class="hero-title">Site Visit Report <span style="color: #92d050;">Pro</span></h1>
+                <p class="hero-subtitle">Transform your field data into professional, management-ready reports in
+                    seconds.</p>
+                <div style="margin-top: 2rem; display: flex; gap: 1rem; opacity: 0.8;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem;">
+                        <i data-lucide="check-circle" size="16"></i> Professional PDF
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem;">
+                        <i data-lucide="check-circle" size="16"></i> Team Analytics
+                    </div>
+                </div>
+            </div>
+
+            <div class="welcome-right">
+                <img src="LOGO.png" alt="Company Logo" class="welcome-logo">
+                <div class="drop-zone" onclick="document.getElementById('excelInput').click()">
+                    <i data-lucide="file-spreadsheet" size="48" style="color: #64748b; margin-bottom: 1rem;"></i>
+                    <h3 style="margin-bottom: 0.5rem; color: #1e293b;">Click to Upload</h3>
+                    <p style="color: #64748b; font-size: 0.9rem;">or drag and drop your Excel file here</p>
+                </div>
+                <input type="file" id="excelInput" hidden accept=".xlsx, .xls">
+            </div>
         </div>
 
         <div id="controlPanel" class="controls-container" style="display: none;">
@@ -347,9 +430,12 @@
                 <input type="date" id="endDate" class="date-input" onchange="updateView()">
             </div>
 
-            <div class="btn-group">
+            <div class="btn-group" style="display: flex; gap: 0.8rem;">
                 <button id="downloadBtn" class="btn-main" onclick="window.print()" disabled>
                     <i data-lucide="printer"></i> Cummulative Download PDF
+                </button>
+                <button id="individualPdfBtn" class="btn-main" onclick="downloadIndividualPDFs()" disabled>
+                    <i data-lucide="folder-down"></i> Individual Download PDF
                 </button>
             </div>
 
@@ -534,6 +620,7 @@
             document.getElementById('teamLeaderName').innerText = sel.toUpperCase();
             document.getElementById('teamLeaderName').style.background = sel.includes("All") ? "var(--header-blue)" : "var(--header-green)";
             document.getElementById('downloadBtn').disabled = false;
+            document.getElementById('individualPdfBtn').disabled = false;
         }
 
         function performFilter(selectedName, startDate, endDate) {
@@ -541,9 +628,10 @@
             if (selectedName && selectedName !== "All Teams") {
                 const search = selectedName.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
                 res = res.filter(r => {
-                    return Object.values(r).some(val => {
-                        const cellVal = String(val || "").toLowerCase().replace(/[^a-z0-9]/g, '').trim();
-                        return cellVal.includes(search) || search.includes(cellVal) && cellVal.length > 3;
+                    const colsToCheck = [config.teamCol, config.teleCol, config.staffCol];
+                    return colsToCheck.some(col => {
+                        const cellVal = String(r[col] || "").toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+                        return cellVal.includes(search) || (search.includes(cellVal) && cellVal.length > 3);
                     });
                 });
             }
@@ -596,8 +684,13 @@
             const colgroup = document.createElement('colgroup');
             // Easy control: add or remove column numbers from this list to show/hide them
             const hidden = [2, 3, 11, 12];
+            //const hidden = [11, 12];
+
+            // Sync this with the PDF exporter automatically
+            window.hiddenPDFColumns = hidden;
 
             // Base widths: we give 0% to hidden ones and extra space to COMMENTS (last column)
+            //const widths = [3, 6, 0, 0, 11, 10, 5, 8, 8, 11, 9, 0, 0, 8.5, 20.5];
             const widths = [3, 6, 0, 0, 11, 10, 5, 8, 8, 11, 9, 0, 0, 8.5, 20.5];
 
             widths.forEach((w, i) => {
@@ -719,10 +812,160 @@
             return isNaN(d) ? v : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
         }
 
+        async function downloadIndividualPDFs() {
+            const btn = document.getElementById('individualPdfBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i data-lucide="loader" class="spinner-icon"></i> Processing Zips...';
+            lucide.createIcons();
+
+            document.getElementById('loadingOverlay').style.display = 'flex';
+
+            try {
+                const sel = document.getElementById('masterPicker').value;
+                const start = document.getElementById('startDate').value;
+                const end = document.getElementById('endDate').value;
+                let filtered = performFilter(sel, start, end);
+
+                if (filtered.length === 0) {
+                    alert("No data available to download.");
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    return;
+                }
+
+                const zip = new JSZip();
+
+                const teams = {};
+                filtered.forEach(r => {
+                    const teamName = (r[config.teamCol] || "OTHERS").toUpperCase().trim();
+                    const teleName = (r[config.teleCol] || "-").toUpperCase().trim();
+                    const sanitizedTeamName = teamName.replace(/[/\\?%*:|"<>]/g, '-');
+                    const sanitizedTeleName = teleName.replace(/[/\\?%*:|"<>]/g, '-');
+
+                    if (!teams[sanitizedTeamName]) teams[sanitizedTeamName] = {};
+                    if (!teams[sanitizedTeamName][sanitizedTeleName]) teams[sanitizedTeamName][sanitizedTeleName] = [];
+                    teams[sanitizedTeamName][sanitizedTeleName].push(r);
+                });
+
+                const baseTitle = document.getElementById('masterTitle').innerText;
+                // Read the currently active hidden columns configured by the dashboard
+                const hiddenColumns = window.hiddenPDFColumns || [2, 3, 11, 12];
+                const allTitles = ['S.NO', 'DATE', 'TEAM NAME', 'TELE MARKETING STAFF NAME', 'SITE VISIT GIVEN STAFFNAME', 'CLIENT NAME', 'BUDGET', 'PHONE', 'SOURCE OF LEADS', 'VISITED LAYOUTS', 'INTERSTED LAYOUT', 'CONVERT TO SITTING YES / NO', 'SITTING DATE', 'FEEDBACK', 'COMMENTS'];
+                const allWidths = [3, 6, 0, 0, 11, 10, 5, 8, 8, 11, 9, 0, 0, 8.5, 20.5];
+                const leftAlignCols = [3, 4, 5, 8, 9, 10, 11, 13, 14];
+
+                const visibleTitles = allTitles.filter((_, i) => !hiddenColumns.includes(i));
+                const colSpanCount = visibleTitles.length;
+
+                // Sync the exact column widths and alignments into PDF rules
+                const columnStyles = {};
+                let visIdx = 0;
+                const availablePtWidth = 842 - 30; // 842 (A4 Landscape) - 30 (left+right margins)
+
+                allTitles.forEach((_, i) => {
+                    if (!hiddenColumns.includes(i)) {
+                        let pct = allWidths[i] || 5; // safe fallback
+                        columnStyles[visIdx] = {
+                            cellWidth: (pct / 100) * availablePtWidth,
+                            halign: leftAlignCols.includes(i) ? 'left' : 'center'
+                        };
+                        visIdx++;
+                    }
+                });
+
+                for (const team in teams) {
+                    const teamFolder = zip.folder(team);
+                    for (const tele in teams[team]) {
+                        const staffData = teams[team][tele];
+
+                        const doc = new window.jspdf.jsPDF('landscape', 'pt', 'a4');
+
+                        let rows = [];
+                        let sNo = 1;
+                        staffData.forEach(r => {
+                            const getVal = (row, ...keys) => {
+                                for (let k of keys) {
+                                    const uk = k.toUpperCase().trim();
+                                    if (row[uk] !== undefined) return row[uk];
+                                    if (row[k] !== undefined) return row[k];
+                                }
+                                return "-";
+                            };
+                            const givenName = (r[config.staffCol] || "-").toUpperCase().trim();
+                            const allCells = [
+                                String(sNo++), formatDate(getVal(r, 'DATE')), team, tele, givenName,
+                                String(getVal(r, 'CLIENT NAME', 'CLIENT')), String(getVal(r, 'BUDGET')), String(getVal(r, 'PHONE', 'CONTACT', 'MOBILE')),
+                                String(getVal(r, 'SOURCE OF LEADS', 'SOURCE')), String(getVal(r, 'VISITED LAYOUTS', 'VISITED')),
+                                String(getVal(r, 'INTERSTED LAYOUT', 'INTERSTED')), String(getVal(r, 'CONVERT TO SITTING YES / NO', 'SITTING YES/NO')),
+                                formatDate(getVal(r, 'SITTING DATE', 'SITTING')), String(getVal(r, 'FEEDBACK')),
+                                String(getVal(r, config.commentCol, 'COMMENTS', 'REMARKS'))
+                            ];
+                            const visibleCells = allCells.filter((_, i) => !hiddenColumns.includes(i)).map(c => (c === "-" || !c || c === "null" || c === "undefined") ? "" : c);
+                            rows.push(visibleCells);
+                        });
+
+                        doc.autoTable({
+                            theme: 'grid',
+                            head: [
+                                [{ content: baseTitle, colSpan: colSpanCount, styles: { fillColor: [255, 242, 204], textColor: 0, fontStyle: 'bold', halign: 'center', fontSize: 13 } }],
+                                [{ content: team, colSpan: colSpanCount, styles: { fillColor: [146, 208, 80], textColor: 0, fontStyle: 'bold', halign: 'center', fontSize: 11 } }],
+                                [{ content: tele, colSpan: colSpanCount, styles: { fillColor: [226, 239, 218], textColor: 0, fontStyle: 'bold', halign: 'center', fontSize: 10 } }],
+                                visibleTitles
+                            ],
+                            body: rows,
+                            margin: { top: 20, left: 15, right: 15, bottom: 20 },
+                            styles: {
+                                font: 'helvetica',
+                                fontSize: 7,
+                                lineWidth: 0.5,
+                                lineColor: [0, 0, 0],
+                                textColor: 0,
+                                valign: 'middle',
+                                cellPadding: 3
+                            },
+                            columnStyles: columnStyles,
+                            headStyles: {
+                                lineWidth: 0.5,
+                                lineColor: [0, 0, 0]
+                            },
+                            didParseCell: function (data) {
+                                if (data.section === 'head' && data.row.index === 3) {
+                                    data.cell.styles.fillColor = [180, 198, 231];
+                                    data.cell.styles.fontStyle = 'bold';
+                                    data.cell.styles.halign = 'center';
+                                }
+                            }
+                        });
+
+                        const pdfBlob = doc.output('blob');
+                        teamFolder.file(tele + '.pdf', pdfBlob);
+                    }
+                }
+
+                // Generate Zip
+                const zipBlob = await zip.generateAsync({ type: "blob" });
+                const zipFileName = (sel === "All Teams") ? "All_Teams_Reports.zip" : `${sel.replace(/[/\\?%*:|"<>]/g, '-')}_Reports.zip`;
+                saveAs(zipBlob, zipFileName);
+
+            } catch (e) {
+                alert("Error generating PDFs: " + e.message);
+                console.error(e);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="folder-down"></i> Individual Download PDF';
+                document.getElementById('loadingOverlay').style.display = 'none';
+                lucide.createIcons();
+            }
+        }
         function formatFullDate(d) {
             if (!d || isNaN(d)) return "";
             return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
         }
+    </script>
+    <script>
+        // Initialize Lucide icons after all content is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
     </script>
 </body>
 
