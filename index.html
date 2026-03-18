@@ -628,7 +628,7 @@
             if (selectedName && selectedName !== "All Teams") {
                 const search = selectedName.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
                 res = res.filter(r => {
-                    const colsToCheck = [config.teamCol, config.teleCol, config.staffCol];
+                    const colsToCheck = [config.teamCol];
                     return colsToCheck.some(col => {
                         const cellVal = String(r[col] || "").toLowerCase().replace(/[^a-z0-9]/g, '').trim();
                         return cellVal.includes(search) || (search.includes(cellVal) && cellVal.length > 3);
