@@ -122,6 +122,40 @@
             background: #475569;
         }
 
+        .tab-nav {
+            display: flex;
+            gap: 0;
+            padding: 0 2rem;
+            background: #f1f5f9;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.8rem;
+            border: none;
+            background: transparent;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #64748b;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .tab-btn:hover {
+            color: var(--accent);
+        }
+
+        .tab-active {
+            color: var(--accent) !important;
+            border-bottom: 3px solid var(--accent) !important;
+            background: white !important;
+        }
+
         #reportCanvas {
             width: 100%;
             max-width: 100%;
@@ -133,9 +167,129 @@
             overflow: visible;
         }
 
+        #choiceScreen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 70vh;
+            padding: 2rem;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .choice-card-container {
+            display: flex;
+            gap: 2.5rem;
+            margin-top: 3.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .choice-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            padding: 3rem 2rem;
+            width: 340px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+        }
+
+        .choice-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), #92d050);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .choice-card:hover {
+            border-color: #cbd5e1;
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        .choice-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon-wrapper {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .choice-card:hover .card-icon-wrapper {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .choice-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 1rem;
+            letter-spacing: -0.01em;
+        }
+
+        .choice-desc {
+            color: #64748b;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            flex-grow: 1;
+        }
+
+        .card-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 0.95rem;
+            opacity: 0.8;
+            transition: gap 0.3s, opacity 0.3s;
+        }
+
+        .choice-card:hover .card-action {
+            gap: 0.75rem;
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .report-header-zone {
             text-align: center;
             border: 2px solid var(--border-excel);
+            page-break-after: avoid;
+            break-after: avoid;
         }
 
         .main-header {
@@ -412,10 +566,42 @@
             </div>
         </div>
 
+        <!-- ===== CHOICE SCREEN ===== -->
+        <div id="choiceScreen">
+            <h2 style="font-size: 2.5rem; color: #0f172a; font-weight: 800; letter-spacing: -0.02em;">Data Uploaded
+                Successfully! 🎉</h2>
+            <p style="color: #64748b; font-size: 1.15rem; margin-top: 0.75rem; max-width: 500px; text-align: center;">
+                Your data has been processed securely. How would you like to view your report?</p>
+
+            <div class="choice-card-container">
+                <div class="choice-card" onclick="startApp('team')">
+                    <div class="card-icon-wrapper"
+                        style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); color: #4f46e5;">
+                        <i data-lucide="building-2" size="40"></i>
+                    </div>
+                    <div class="choice-title">Team View Report</div>
+                    <p class="choice-desc">Generate aggregated reports filtered and organized entirely by Team Leaders.
+                    </p>
+                    <div class="card-action">Continue <i data-lucide="arrow-right" size="16"></i></div>
+                </div>
+
+                <div class="choice-card" onclick="startApp('staff')">
+                    <div class="card-icon-wrapper"
+                        style="background: linear-gradient(135deg, #ecfdf5 0%, #a7f3d0 100%); color: #059669;">
+                        <i data-lucide="users-2" size="40"></i>
+                    </div>
+                    <div class="choice-title">Staff Name Report</div>
+                    <p class="choice-desc">Generate granular reports drilled down directly by individual Tele Staff
+                        names.</p>
+                    <div class="card-action">Continue <i data-lucide="arrow-right" size="16"></i></div>
+                </div>
+            </div>
+        </div>
+
         <div id="controlPanel" class="controls-container" style="display: none;">
             <div class="filter-group">
                 <span class="filter-label">1. Select Name</span>
-                <select id="masterPicker" onchange="updateView()">
+                <select id="masterPicker" onchange="onTeamChange()">
                     <option value="">-- Loading --</option>
                 </select>
             </div>
@@ -439,10 +625,57 @@
                 </button>
             </div>
 
-            <button class="btn-main" onclick="location.reload()"
-                style="background: transparent; color: #64748b; border: 1px solid #e2e8f0; margin-left:1rem;">
-                <i data-lucide="refresh-cw"></i> New File
-            </button>
+            <div class="btn-group" style="display: flex; gap: 0.8rem;">
+                <button class="btn-main" onclick="goBackToChoices()"
+                    style="background: transparent; color: #64748b; border: 1px solid #e2e8f0;">
+                    <i data-lucide="arrow-left"></i> Main Menu
+                </button>
+                <button class="btn-main" onclick="location.reload()"
+                    style="background: transparent; color: #64748b; border: 1px solid #e2e8f0; margin-left:1rem;">
+                    <i data-lucide="refresh-cw"></i> New File
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== STAFF NAME TAB PANEL ===== -->
+        <div id="staffPanel" class="controls-container" style="display: none;">
+            <div class="filter-group">
+                <span class="filter-label">1. Team Name</span>
+                <select id="staffTeamPicker" onchange="onStaffTeamChange()">
+                    <option value="All Teams">All Teams</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <span class="filter-label">2. Staff Name</span>
+                <select id="telePicker" onchange="updateStaffView()">
+                    <option value="All Staff">All Staff</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <span class="filter-label">3. From Date</span>
+                <input type="date" id="staffStartDate" class="date-input" onchange="updateStaffView()">
+            </div>
+
+            <div class="filter-group">
+                <span class="filter-label">4. To Date</span>
+                <input type="date" id="staffEndDate" class="date-input" onchange="updateStaffView()">
+            </div>
+
+            <div class="btn-group" style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
+                <button id="staffDownloadBtn" class="btn-main" onclick="window.print()" disabled>
+                    <i data-lucide="printer"></i> Download PDF
+                </button>
+                <button class="btn-main" onclick="goBackToChoices()"
+                    style="background: transparent; color: #64748b; border: 1px solid #e2e8f0; margin-left:1rem;">
+                    <i data-lucide="arrow-left"></i> Main Menu
+                </button>
+                <button class="btn-main" onclick="location.reload()"
+                    style="background: transparent; color: #64748b; border: 1px solid #e2e8f0;">
+                    <i data-lucide="refresh-cw"></i> New File
+                </button>
+            </div>
         </div>
     </div>
 
@@ -561,8 +794,14 @@
                                         }
                                     });
                                     return obj;
+                                }).map(obj => {
+                                    obj._normTeam = String(obj[config.teamCol] || obj["TEAM NAME"] || "").toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+                                    obj._normStaff = String(obj[config.teleCol] || obj["TELE MARKETING STAFF NAME"] || "").toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+                                    obj._sortTeam = String(obj[config.teamCol] || obj["TEAM NAME"] || "").toLowerCase().trim();
+                                    obj._sortStaff = String(obj[config.teleCol] || obj["TELE MARKETING STAFF NAME"] || "").toLowerCase().trim();
+                                    return obj;
                                 }).filter(r => {
-                                    const vals = Object.values(r).filter(v => v !== "" && v !== null && v !== undefined);
+                                    const vals = Object.values(r).filter(v => v !== "" && v !== null && v !== undefined && typeof v !== 'boolean' && !String(v).startsWith('_norm'));
                                     return vals.length >= 2;
                                 });
 
@@ -581,11 +820,9 @@
                         }
 
                         populateMasterPicker();
+                        populateTelePicker(rawData);
                         document.getElementById('uploadSection').style.display = 'none';
-                        document.getElementById('controlPanel').style.display = 'flex';
-                        document.getElementById('reportCanvas').style.display = 'block';
-                        document.getElementById('masterPicker').value = "All Teams";
-                        updateView();
+                        document.getElementById('choiceScreen').style.display = 'flex';
                     } catch (err) {
                         document.getElementById('loadingOverlay').style.display = 'none';
                         alert("Processing failed: " + err.message);
@@ -595,27 +832,158 @@
             reader.readAsArrayBuffer(file);
         });
 
+        function startApp(mode) {
+            showLoading(() => {
+                document.getElementById('choiceScreen').style.display = 'none';
+                document.getElementById('reportCanvas').style.display = 'block';
+                document.getElementById('masterPicker').value = "All Teams";
+                switchTab(mode);
+            });
+        }
+
+        function showLoading(callback) {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.querySelector('p').innerText = "Loading Dashboard...";
+            overlay.style.display = 'flex';
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    callback();
+                    overlay.style.display = 'none';
+                }, 50);
+            });
+        }
+
         function populateMasterPicker() {
             const picker = document.getElementById('masterPicker');
+            const staffTeamPicker = document.getElementById('staffTeamPicker');
             picker.innerHTML = '<option value="">-- Select --</option>';
+            staffTeamPicker.innerHTML = '';
             PREDEFINED_TEAMS.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name; opt.innerText = name;
+                picker.appendChild(opt);
+
+                const opt2 = document.createElement('option');
+                opt2.value = name; opt2.innerText = name;
+                staffTeamPicker.appendChild(opt2);
+            });
+        }
+
+        function populateTelePicker(dataSource) {
+            const picker = document.getElementById('telePicker');
+            picker.innerHTML = '<option value="All Staff">All Staff</option>';
+            const nameMap = new Map();
+            dataSource.forEach(r => {
+                const original = (r[config.teleCol] || "").trim();
+                if (original) {
+                    const normalizedKey = original.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    if (!nameMap.has(normalizedKey)) {
+                        nameMap.set(normalizedKey, original.toUpperCase());
+                    }
+                }
+            });
+            Array.from(nameMap.values()).sort().forEach(name => {
                 const opt = document.createElement('option');
                 opt.value = name; opt.innerText = name;
                 picker.appendChild(opt);
             });
         }
 
-        function updateView() {
+        function onTeamChange() {
+            // Team view only
+            updateView();
+        }
+
+        function onStaffTeamChange() {
+            showLoading(() => {
+                const sel = document.getElementById('staffTeamPicker').value;
+                let subset = rawData;
+                if (sel && sel !== 'All Teams') {
+                    const search = sel.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+                    subset = rawData.filter(r => r._normTeam.includes(search) || (search.includes(r._normTeam) && r._normTeam.length > 3));
+                }
+                populateTelePicker(subset);
+                _updateStaffView();
+            });
+        }
+
+        function goBackToChoices() {
+            document.getElementById('controlPanel').style.display = 'none';
+            document.getElementById('staffPanel').style.display = 'none';
+            document.getElementById('reportCanvas').style.display = 'none';
+            document.getElementById('choiceScreen').style.display = 'flex';
+        }
+
+        function switchTab(tab) {
+            const isTeam = tab === 'team';
+            document.getElementById('controlPanel').style.display = isTeam ? 'flex' : 'none';
+            document.getElementById('staffPanel').style.display = isTeam ? 'none' : 'flex';
+            if (isTeam) updateView(); else updateStaffView();
+        }
+
+        function updateStaffView() { showLoading(_updateStaffView); }
+        function _updateStaffView() {
+            const teamSel = document.getElementById('staffTeamPicker').value;
+            const teleSel = document.getElementById('telePicker').value;
+            const start = document.getElementById('staffStartDate').value;
+            const end = document.getElementById('staffEndDate').value;
+
+            const tName = (!teamSel || teamSel === 'All Teams') ? 'ALL TEAMS' : teamSel.toUpperCase();
+            const sName = (!teleSel || teleSel === 'All Staff') ? 'ALL STAFF' : teleSel.toUpperCase();
+            const prefix = `${tName}_${sName}_`;
+
+            updateTitle(start, end, prefix);
+
+            let res = rawData;
+            if (teamSel && teamSel !== 'All Teams') {
+                const teamSearch = teamSel.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+                res = res.filter(r => r._normTeam.includes(teamSearch) || (teamSearch.includes(r._normTeam) && r._normTeam.length > 3));
+            }
+            if (teleSel && teleSel !== 'All Staff') {
+                const teleSearch = teleSel.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+                res = res.filter(r => r._normStaff.includes(teleSearch) || (teleSearch.includes(r._normStaff) && r._normStaff.length > 3));
+            }
+            if (start || end) {
+                const s = start ? new Date(start) : null;
+                const e = end ? new Date(end) : null;
+                res = res.filter(r => {
+                    const dateVal = r['DATE'] || r['Date'] || r['date'];
+                    if (!dateVal) return false;
+                    const rd = new Date(dateVal);
+                    if (isNaN(rd)) return false;
+                    if (s) { s.setHours(0, 0, 0, 0); if (rd < s) return false; }
+                    if (e) { e.setHours(23, 59, 59, 999); if (rd > e) return false; }
+                    return true;
+                });
+            }
+
+            const isAllStaff = (!teleSel || teleSel === 'All Staff');
+            res.sort((a, b) => {
+                if (a._sortStaff !== b._sortStaff) return a._sortStaff < b._sortStaff ? -1 : 1;
+                if (a._sortTeam !== b._sortTeam) return a._sortTeam < b._sortTeam ? -1 : 1;
+                return 0;
+            });
+
+            renderTable(res, 'staff');
+            const isAllTeams = (!teamSel || teamSel === 'All Teams');
+            const displayName = isAllTeams ? 'ALL TEAMS' : teamSel.toUpperCase();
+            document.getElementById('teamLeaderName').innerText = displayName;
+            document.getElementById('teamLeaderName').style.background = isAllTeams ? 'var(--header-blue)' : 'var(--header-green)';
+            document.getElementById('staffDownloadBtn').disabled = false;
+        }
+
+        function updateView() { showLoading(_updateView); }
+        function _updateView() {
             const sel = document.getElementById('masterPicker').value;
             const start = document.getElementById('startDate').value;
             const end = document.getElementById('endDate').value;
             if (!sel) return;
 
-            // Update title first so renderTable uses the new value for repeating rows
-            updateTitle(start, end);
+            const prefix = sel.toUpperCase().includes("ALL") ? "ALL TEAMS_" : `${sel.toUpperCase()}_`;
+            updateTitle(start, end, prefix);
 
             let filtered = performFilter(sel, start, end);
-            renderTable(filtered);
+            renderTable(filtered, 'team');
 
             document.getElementById('teamLeaderName').innerText = sel.toUpperCase();
             document.getElementById('teamLeaderName').style.background = sel.includes("All") ? "var(--header-blue)" : "var(--header-green)";
@@ -623,17 +991,16 @@
             document.getElementById('individualPdfBtn').disabled = false;
         }
 
-        function performFilter(selectedName, startDate, endDate) {
+        function performFilter(selectedName, startDate, endDate, selectedTele) {
             let res = rawData;
             if (selectedName && selectedName !== "All Teams") {
                 const search = selectedName.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
-                res = res.filter(r => {
-                    const colsToCheck = [config.teamCol];
-                    return colsToCheck.some(col => {
-                        const cellVal = String(r[col] || "").toLowerCase().replace(/[^a-z0-9]/g, '').trim();
-                        return cellVal.includes(search) || (search.includes(cellVal) && cellVal.length > 3);
-                    });
-                });
+                res = res.filter(r => r._normTeam.includes(search) || (search.includes(r._normTeam) && r._normTeam.length > 3));
+            }
+
+            if (selectedTele && selectedTele !== "All Staff") {
+                const teleSearch = selectedTele.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+                res = res.filter(r => r._normStaff.includes(teleSearch) || (teleSearch.includes(r._normStaff) && r._normStaff.length > 3));
             }
 
             if (startDate || endDate) {
@@ -650,112 +1017,102 @@
                 });
             }
 
+            const sel = document.getElementById('masterPicker').value;
+            const isAllTeams = sel === "All Teams";
             res.sort((a, b) => {
-                const sel = document.getElementById('masterPicker').value;
-                if (sel !== "All Teams") {
-                    const sA = String(a[config.teleCol] || "").toLowerCase().trim();
-                    const sB = String(b[config.teleCol] || "").toLowerCase().trim();
-                    if (sA !== sB) return sA < sB ? -1 : 1;
+                if (!isAllTeams) {
+                    if (a._sortStaff !== b._sortStaff) return a._sortStaff < b._sortStaff ? -1 : 1;
                 }
-                const teamA = String(a[config.teamCol] || "").toLowerCase().trim();
-                const teamB = String(b[config.teamCol] || "").toLowerCase().trim();
-                if (teamA !== teamB) return teamA < teamB ? -1 : 1;
-                const staffA = String(a[config.teleCol] || "").toLowerCase().trim();
-                const staffB = String(b[config.teleCol] || "").toLowerCase().trim();
-                return staffA < staffB ? -1 : 1;
+                if (a._sortTeam !== b._sortTeam) return a._sortTeam < b._sortTeam ? -1 : 1;
+                return a._sortStaff < b._sortStaff ? -1 : 1;
             });
             return res;
         }
 
-        function renderTable(data) {
+        function renderTable(data, mode = 'team') {
             const tbody = document.getElementById('tableBody');
             const thead = document.getElementById('mainHeader');
-            tbody.innerHTML = ''; thead.innerHTML = '';
+            thead.innerHTML = '';
+
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="15" style="padding: 3rem; color: #94a3b8;">No records found for this selection</td></tr>';
+                const table = document.querySelector('.data-table');
+                if (table) table.querySelector('tbody').innerHTML = '<tr><td colspan="15" style="padding: 3rem; color: #94a3b8;">No records found for this selection</td></tr>';
                 return;
             }
 
-            // NEAT FITTING: Define fixed widths for columns
-            const table = document.querySelector('.data-table');
-            const existingColgroup = table.querySelector('colgroup');
-            if (existingColgroup) existingColgroup.remove();
-
-            const colgroup = document.createElement('colgroup');
-            // Easy control: add or remove column numbers from this list to show/hide them
             const hidden = [2, 3, 11, 12];
-            //const hidden = [11, 12];
-
-            // Sync this with the PDF exporter automatically
             window.hiddenPDFColumns = hidden;
-
-            // Base widths: we give 0% to hidden ones and extra space to COMMENTS (last column)
-            //const widths = [3, 6, 0, 0, 11, 10, 5, 8, 8, 11, 9, 0, 0, 8.5, 20.5];
             const widths = [3, 6, 0, 0, 11, 10, 5, 8, 8, 11, 9, 0, 0, 8.5, 20.5];
 
+            let colgroupHTML = '<colgroup>';
             widths.forEach((w, i) => {
-                const col = document.createElement('col');
-                if (hidden.includes(i)) col.style.display = 'none';
-                else col.style.width = w + '%';
-                colgroup.appendChild(col);
+                if (hidden.includes(i)) colgroupHTML += '<col style="display:none">';
+                else colgroupHTML += `<col style="width:${w}%">`;
             });
-            table.insertBefore(colgroup, thead);
+            colgroupHTML += '</colgroup>';
+
+            const titles = ['S.NO', 'DATE', 'TEAM NAME', 'TELE MARKETING STAFF NAME', 'SITE VISIT GIVEN STAFFNAME', 'CLIENT NAME', 'BUDGET', 'PHONE', 'SOURCE OF LEADS', 'VISITED LAYOUTS', 'INTERSTED LAYOUT', 'CONVERT TO SITTING YES / NO', 'SITTING DATE', 'FEEDBACK', 'COMMENTS'];
+
+            const esc = str => String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+            let globalThs = '';
+            titles.forEach((t, idx) => {
+                let cls = hidden.includes(idx) ? ' class="hide-col"' : '';
+                globalThs += `<th${cls}>${esc(t)}</th>`;
+            });
+            const theadHTML = `<thead><tr style="background:var(--header-blue)">${globalThs}</tr></thead>`;
+
+            // Setup dynamic container
+            const legacyTable = document.querySelector('.data-table');
+            if (legacyTable && legacyTable.id !== 'managed') {
+                legacyTable.style.display = 'none';
+                legacyTable.id = 'managed';
+            }
+            let dynamicContainer = document.getElementById('dynamicTablesContainer');
+            if (!dynamicContainer) {
+                dynamicContainer = document.createElement('div');
+                dynamicContainer.id = 'dynamicTablesContainer';
+                document.getElementById('reportCanvas').appendChild(dynamicContainer);
+            }
 
             let currentGroup = "";
             let sNo = 1;
-            const sel = document.getElementById('masterPicker').value;
-            data.forEach((r) => {
+            const masterTitleText = document.getElementById('masterTitle').innerText;
+            let htmlChunks = [];
+
+            const getVal = (row, ...keys) => {
+                for (let k of keys) {
+                    const uk = k.toUpperCase().trim();
+                    if (row[uk] !== undefined) return row[uk];
+                    if (row[k] !== undefined) return row[k];
+                }
+                return "-";
+            };
+
+            data.forEach((r, idx) => {
                 const teamName = (r[config.teamCol] || "OTHERS").toUpperCase().trim();
                 const teleName = (r[config.teleCol] || "-").toUpperCase().trim();
                 const givenName = (r[config.staffCol] || "-").toUpperCase().trim();
-                const groupValue = (sel === "All Teams") ? teamName : teleName;
+
+                const groupValue = (mode === 'staff') ? teleName : ((document.getElementById('masterPicker').value === "All Teams") ? teamName : teleName);
+
                 if (groupValue !== currentGroup) {
-                    // MASTER HEADER ROW (Repeating for each person except the first one)
                     if (currentGroup !== "") {
-                        const masterTr = document.createElement('tr');
-                        masterTr.classList.add('master-header-row'); // Style in CSS
-                        const masterTd = document.createElement('td');
-                        masterTd.colSpan = 15;
-                        masterTd.style.background = "#fff9e6"; // Cream background
-                        masterTd.style.fontFamily = "'Playfair Display', serif";
-                        masterTd.style.fontWeight = "700";
-                        masterTd.style.fontSize = "1.1rem";
-                        masterTd.style.padding = "12px";
-                        masterTd.style.border = "1px solid #1a1a1a";
-                        masterTd.innerText = document.getElementById('masterTitle').innerText;
-                        masterTr.appendChild(masterTd);
-                        tbody.appendChild(masterTr);
+                        htmlChunks.push(`</tbody></table>`);
+                        // Enforce pagination to cleanly jump to the next page for each subsequent Team/Staff group,
+                        // and natively avoid breaking exactly after the box, so it remains cleanly glued to the table below!
+                        htmlChunks.push(`<div style="background:#fff9e6; font-family:'Playfair Display', serif; font-weight:700; font-size:1.1rem; padding:12px; border:1px solid #1a1a1a; margin-top:2rem; text-align:center; border-bottom: none; page-break-before: always; break-before: page; page-break-after: avoid; break-after: avoid;">${esc(masterTitleText)}</div>`);
                     }
 
-                    const headerTr = document.createElement('tr');
-                    headerTr.classList.add('group-header-row');
-                    const headerTd = document.createElement('td');
-                    headerTd.colSpan = 15;
-                    headerTd.innerText = groupValue;
-                    headerTr.appendChild(headerTd);
-                    tbody.appendChild(headerTr);
+                    const marginTop = (currentGroup === "") ? "0" : "0";
+                    // Enforce avoid-page-break so this group text never gets visually orphaned from the blue table headers
+                    htmlChunks.push(`<div style="background: #dcfce7; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.1rem; padding: 12px; border: 1px solid #1a1a1a; text-align: center; border-bottom: none; margin-top: ${marginTop}; page-break-after: avoid; break-after: avoid;">${esc(groupValue)}</div>`);
 
-                    const blueTr = document.createElement('tr');
-                    blueTr.style.background = "var(--header-blue)";
-                    const titles = ['S.NO', 'DATE', 'TEAM NAME', 'TELE MARKETING STAFF NAME', 'SITE VISIT GIVEN STAFFNAME', 'CLIENT NAME', 'BUDGET', 'PHONE', 'SOURCE OF LEADS', 'VISITED LAYOUTS', 'INTERSTED LAYOUT', 'CONVERT TO SITTING YES / NO', 'SITTING DATE', 'FEEDBACK', 'COMMENTS'];
-                    titles.forEach((t, idx) => {
-                        const th = document.createElement('th');
-                        th.innerText = t;
-                        if (hidden.includes(idx)) th.classList.add('hide-col');
-                        blueTr.appendChild(th);
-                    });
-                    tbody.appendChild(blueTr);
+                    htmlChunks.push(`<table class="data-table" style="margin-top: 0; margin-bottom: 0;">${colgroupHTML}${theadHTML}<tbody>`);
+
                     currentGroup = groupValue; sNo = 1;
                 }
-                const getVal = (row, ...keys) => {
-                    for (let k of keys) {
-                        const uk = k.toUpperCase().trim();
-                        if (row[uk] !== undefined) return row[uk];
-                        if (row[k] !== undefined) return row[k];
-                    }
-                    return "-";
-                };
-                const tr = document.createElement('tr');
+
                 const rowCells = [
                     sNo++, formatDate(getVal(r, 'DATE')), teamName, teleName, givenName,
                     getVal(r, 'CLIENT NAME', 'CLIENT'), getVal(r, 'BUDGET'), getVal(r, 'PHONE', 'CONTACT', 'MOBILE'),
@@ -764,21 +1121,31 @@
                     formatDate(getVal(r, 'SITTING DATE', 'SITTING')), getVal(r, 'FEEDBACK'),
                     getVal(r, config.commentCol, 'COMMENTS', 'REMARKS')
                 ];
+
+                let tds = '';
                 rowCells.forEach((val, idx) => {
-                    const td = document.createElement('td');
-                    td.innerText = (val === "-" || val === null || val === undefined) ? "" : val;
-                    if (hidden.includes(idx)) td.classList.add('hide-col');
-                    if ([3, 4, 5, 8, 9, 10, 11, 13, 14].includes(idx)) td.classList.add('text-left');
-                    tr.appendChild(td);
+                    let text = (val === "-" || val === null || val === undefined) ? "" : String(val);
+                    let clsList = [];
+                    if (hidden.includes(idx)) clsList.push('hide-col');
+                    if ([3, 4, 5, 8, 9, 10, 11, 13, 14].includes(idx)) clsList.push('text-left');
+                    let classAttr = clsList.length > 0 ? ` class="${clsList.join(' ')}"` : '';
+                    tds += `<td${classAttr}>${esc(text)}</td>`;
                 });
-                tbody.appendChild(tr);
+
+                htmlChunks.push(`<tr>${tds}</tr>`);
             });
+
+            if (currentGroup !== "") {
+                htmlChunks.push(`</tbody></table>`);
+            }
+
+            dynamicContainer.innerHTML = htmlChunks.join('');
+            lucide.createIcons();
         }
 
-        function updateTitle(start, end) {
+        function updateTitle(start, end, prefix = "") {
             let sDate = start;
             let eDate = end;
-            const selName = document.getElementById('masterPicker').value || "ALL TEAMS";
 
             // Auto-detect dates if not manually selected
             if (!sDate && !eDate && rawData.length > 0) {
@@ -802,8 +1169,7 @@
             document.getElementById('masterTitle').innerText = fullTitle.toUpperCase();
 
             // Set dynamic PDF filename via document title
-            const teamSuffix = selName.toUpperCase().includes("ALL") ? "ALL TEAMS" : `${selName.toUpperCase()} TEAM`;
-            document.title = `${teamSuffix} ${fullTitle}`;
+            document.title = `${prefix}${fullTitle}`;
         }
 
         function formatDate(v) {
